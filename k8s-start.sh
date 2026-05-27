@@ -5,7 +5,7 @@
 
 set -e
 
-cd /Users/bala/frame_v2
+cd ~/frame_v2
 
 echo "🚀 Starting Frame V2 Kubernetes ($(date))"
 
