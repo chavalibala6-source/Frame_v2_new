@@ -8854,10 +8854,10 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
         /* Full Screen Music Player */
    .global-music-player.is-fullscreen {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    height: 100dvh;
-    min-height: 100dvh;
-    max-height: 100dvh;
+    top: -2px !important; left: -2px !important; right: -2px !important; bottom: -2px !important;
+    height: calc(100dvh + 4px) !important;
+    min-height: calc(100dvh + 4px) !important;
+    max-height: calc(100dvh + 4px) !important;
     box-sizing: border-box;
     z-index: 100000;
 
@@ -8866,7 +8866,7 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
     align-items: center;
     justify-content: flex-start;
 
-    width: 100%;
+    width: calc(100% + 4px) !important;
 
     padding:
         max(40px, env(safe-area-inset-top))
