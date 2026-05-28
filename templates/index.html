@@ -4385,10 +4385,30 @@ body.light-mode .notepad {
         }
 
         function updateThemeColorMeta() {
+            const body = document.body;
+            const gmpEl = document.getElementById('globalMusicPlayer');
             let themeColor = '#ffffff'; // Default light mode background color
-            if (document.body.classList.contains('dark-mode')) {
-                themeColor = '#000000'; // Default dark mode background color
+            
+            if (gmpEl && gmpEl.classList.contains('is-fullscreen')) {
+                // When in fullscreen mode, dynamically align the status bar/browser theme-color with the backdrop colors
+                const track = musicState.tracks.find(t => t.id === musicState.currentId);
+                if (track && track.extractedColors) {
+                    if (body.classList.contains('dark-mode')) {
+                        const dark = track.extractedColors.dark;
+                        themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
+                    } else {
+                        const light = track.extractedColors.light;
+                        themeColor = `rgb(${light.r}, ${light.g}, ${light.b})`;
+                    }
+                } else {
+                    themeColor = body.classList.contains('dark-mode') ? '#030305' : '#fafafc';
+                }
+            } else {
+                if (body.classList.contains('dark-mode')) {
+                    themeColor = '#000000'; // Default dark mode background color
+                }
             }
+            
             let metaThemeColor = document.querySelector('meta[name="theme-color"]');
             if (!metaThemeColor) {
                 metaThemeColor = document.createElement('meta');
@@ -9036,6 +9056,24 @@ body:not(.dark-mode) .global-music-player.is-fullscreen::after {
         radial-gradient(circle at 50% 50%, rgba(var(--artwork-dominant-rgb), 0.15) 0%, rgba(var(--artwork-dominant-rgb), 0) 50%);
 }
 
+/* GMP Fullscreen Immersive Background Overrides on HTML & Body elements to eliminate gaps in viewports and overscrolls */
+html.gmp-fullscreen-active,
+body.gmp-fullscreen-active {
+    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-light-rgb), 0.45) 0%, #fafafc 100%) !important;
+    transition: background 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+html.gmp-fullscreen-active.dark-mode,
+body.gmp-fullscreen-active.dark-mode {
+    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb), 0.92) 0%, #030305 100%) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    html.gmp-fullscreen-active:not(.theme-manual) {
+        background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb), 0.92) 0%, #030305 100%) !important;
+    }
+}
+
 /* Smooth entry */
 @keyframes fullscreenPlayerFade {
     from {
@@ -10986,11 +11024,16 @@ body.dark-mode #gmpFullScreenBtn svg {
                 gmpEl.classList.add('is-fullscreen');
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
+                document.body.classList.add('gmp-fullscreen-active');
+                document.documentElement.classList.add('gmp-fullscreen-active');
+                updateThemeColorMeta();
             } else {
                 // Exit fullscreen and restore the exact scroll coordinates
                 gmpEl.classList.remove('is-fullscreen');
                 document.body.style.overflow = '';
                 document.documentElement.style.overflow = '';
+                document.body.classList.remove('gmp-fullscreen-active');
+                document.documentElement.classList.remove('gmp-fullscreen-active');
                 
                 // Return player to its original music section container
                 const musicSection = document.getElementById('musicSection');
@@ -10999,6 +11042,7 @@ body.dark-mode #gmpFullScreenBtn svg {
                 }
                 
                 window.scrollTo(savedScrollX, savedScrollY);
+                updateThemeColorMeta();
             }
             updateMarquee(gmpTitle);
             updateMarquee(gmpArtist);
@@ -11010,6 +11054,8 @@ body.dark-mode #gmpFullScreenBtn svg {
                 gmpEl.classList.remove('is-fullscreen');
                 document.body.style.overflow = '';
                 document.documentElement.style.overflow = '';
+                document.body.classList.remove('gmp-fullscreen-active');
+                document.documentElement.classList.remove('gmp-fullscreen-active');
                 
                 // Return player to its original music section container
                 const musicSection = document.getElementById('musicSection');
@@ -11021,6 +11067,7 @@ body.dark-mode #gmpFullScreenBtn svg {
                 updateMarquee(gmpTitle);
                 updateMarquee(gmpArtist);
                 lucide.createIcons();
+                updateThemeColorMeta();
             }
         };
 
@@ -11281,6 +11328,7 @@ body.dark-mode #gmpFullScreenBtn svg {
             
             updateActiveMusicCardGlow(musicState.currentId, colors);
             updateFullScreenDynamicColors(colors);
+            updateThemeColorMeta();
         }
 
         function clearArtworkColors() {
@@ -11294,6 +11342,7 @@ body.dark-mode #gmpFullScreenBtn svg {
             
             updateActiveMusicCardGlow(null, null);
             updateFullScreenDynamicColors(null);
+            updateThemeColorMeta();
         }
 
         function updateFullScreenDynamicColors(colors) {
