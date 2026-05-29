@@ -4390,16 +4390,13 @@ body.light-mode .notepad {
             let themeColor = '#ffffff'; // Default light mode background color
             
             if (gmpEl && gmpEl.classList.contains('is-fullscreen')) {
-                if (body.classList.contains('dark-mode')) {
-                    const track = musicState.tracks.find(t => t.id === musicState.currentId);
-                    if (track && track.extractedColors) {
-                        const dark = track.extractedColors.dark;
-                        themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
-                    } else {
-                        themeColor = '#030305';
-                    }
+                // Fullscreen is strictly dark mode, so always use the dark extracted color or dark fallback
+                const track = musicState.tracks.find(t => t.id === musicState.currentId);
+                if (track && track.extractedColors) {
+                    const dark = track.extractedColors.dark;
+                    themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
                 } else {
-                    themeColor = '#4f5643';
+                    themeColor = '#030305';
                 }
             } else {
                 if (body.classList.contains('dark-mode')) {
