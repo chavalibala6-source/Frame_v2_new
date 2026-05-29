@@ -4390,18 +4390,13 @@ body.light-mode .notepad {
             let themeColor = '#ffffff'; // Default light mode background color
             
             if (gmpEl && gmpEl.classList.contains('is-fullscreen')) {
-                // When in fullscreen mode, dynamically align the status bar/browser theme-color with the backdrop colors
+                // When in fullscreen mode, dynamically align the status bar/browser theme-color with the backdrop colors (always dynamic dark)
                 const track = musicState.tracks.find(t => t.id === musicState.currentId);
                 if (track && track.extractedColors) {
-                    if (body.classList.contains('dark-mode')) {
-                        const dark = track.extractedColors.dark;
-                        themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
-                    } else {
-                        const light = track.extractedColors.light;
-                        themeColor = `rgb(${light.r}, ${light.g}, ${light.b})`;
-                    }
+                    const dark = track.extractedColors.dark;
+                    themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
                 } else {
-                    themeColor = body.classList.contains('dark-mode') ? '#030305' : '#fafafc';
+                    themeColor = '#030305';
                 }
             } else {
                 if (body.classList.contains('dark-mode')) {
@@ -10995,31 +10990,6 @@ body.dark-mode #gmpFullScreenBtn svg {
 
         let savedScrollX = 0;
         let savedScrollY = 0;
-
-        function updateThemeColorMeta() {
-            const isDarkMode = document.body.classList.contains('dark-mode') || 
-                             (window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('theme-manual'));
-            const isFullscreen = gmpEl.classList.contains('is-fullscreen');
-            
-            const rootStyle = getComputedStyle(document.documentElement);
-            const artworkDarkRgb = rootStyle.getPropertyValue('--artwork-dark-rgb').trim();
-            const artworkLightRgb = rootStyle.getPropertyValue('--artwork-light-rgb').trim();
-            
-            let color = '#ffffff';
-            if (isFullscreen) {
-                color = isDarkMode ? `rgb(${artworkDarkRgb || '3, 3, 5'})` : `rgb(${artworkLightRgb || '250, 250, 252'})`;
-            } else {
-                color = isDarkMode ? '#121214' : '#ffffff';
-            }
-            
-            let meta = document.querySelector('meta[name="theme-color"]');
-            if (!meta) {
-                meta = document.createElement('meta');
-                meta.name = 'theme-color';
-                document.head.appendChild(meta);
-            }
-            meta.content = color;
-        }
 
         gmpFullScreenBtn?.addEventListener('click', () => {
             if (!gmpEl.classList.contains('is-fullscreen')) {
