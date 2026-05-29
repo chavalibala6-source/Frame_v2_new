@@ -8602,14 +8602,15 @@ body.light-mode .notepad {
             min-height: 36px;
         }
 
+/* Increased mini player thumbnail size */
 .gmp-thumbnail {
     position: absolute;
     left: 0px;
-    top: 80%;
+    top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
     background: transparent;
     display: flex;
     align-items: center;
@@ -8629,9 +8630,10 @@ body.light-mode .notepad {
             color: #d1d8aa;
         }
 
-        .gmp-thumbnail svg {
-            width: 20px;
-            height: 20px;
+        .gmp-thumbnail svg,
+        .gmp-thumbnail i {
+            width: 24px;
+            height: 24px;
         }
 
         .gmp-thumbnail img {
@@ -8672,7 +8674,7 @@ body.light-mode .notepad {
             min-width: 0;
             text-align: center;
             width: 100%;
-            padding: 0 46px;
+            padding: 0 54px;
             display: flex;
             flex-direction: column;
             align-items: center;
