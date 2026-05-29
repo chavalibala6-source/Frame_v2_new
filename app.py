@@ -14,6 +14,13 @@ except ImportError:
 
 app = Flask(__name__)
 
+def clean_db_string(val):
+    if val is None:
+        return None
+    if isinstance(val, str):
+        return val.replace('\x00', '').strip()
+    return val
+
 # Store uploads on shared volume to work across replicas
 UPLOAD_DIR = os.path.join(app.root_path, "data", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -153,7 +160,7 @@ def extract_m4a_artist(file_path):
                     data_start, data_size = res_data
                     f.seek(data_start + 16)
                     artist_data = f.read(data_size - 16)
-                    return artist_data.decode('utf-8', errors='ignore').strip()
+                    return artist_data.decode('utf-8', errors='ignore').replace('\x00', '').strip()
     except Exception as e:
         print(f"Error extracting M4A artist: {e}")
     return None
@@ -192,15 +199,15 @@ def extract_mp3_artist(file_path):
                         encoding = frame_body[0]
                         text_bytes = frame_body[1:]
                         if encoding == 0:
-                            return text_bytes.decode('latin1', errors='ignore').strip()
+                            return text_bytes.decode('latin1', errors='ignore').replace('\x00', '').strip()
                         elif encoding == 1:
-                            return text_bytes.decode('utf-16', errors='ignore').strip()
+                            return text_bytes.decode('utf-16', errors='ignore').replace('\x00', '').strip()
                         elif encoding == 2:
-                            return text_bytes.decode('utf-16-be', errors='ignore').strip()
+                            return text_bytes.decode('utf-16-be', errors='ignore').replace('\x00', '').strip()
                         elif encoding == 3:
-                            return text_bytes.decode('utf-8', errors='ignore').strip()
+                            return text_bytes.decode('utf-8', errors='ignore').replace('\x00', '').strip()
                         else:
-                            return text_bytes.decode('utf-8', errors='ignore').strip()
+                            return text_bytes.decode('utf-8', errors='ignore').replace('\x00', '').strip()
                 
                 offset += 10 + frame_size
     except Exception as e:
@@ -619,21 +626,21 @@ def upload_file():
     if not file or file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
 
-    mimetype = (file.mimetype or "").lower()
+    mimetype = clean_db_string((file.mimetype or "").lower())
     if mimetype.startswith("image/") or mimetype.startswith("video/"):
-        return jsonify({"error": "Use the dedicated image/video uploader"}), 400
+        return jsonify({"error": "Use the dedicated uploader"}), 400
 
-    safe_name = secure_filename(file.filename)
-    ext = os.path.splitext(safe_name)[1].lower() or ""
-    track_id = uuid.uuid4().hex
-    storage_name = f"{track_id}{ext}"
+    safe_name = clean_db_string(secure_filename(file.filename))
+    ext = clean_db_string(os.path.splitext(safe_name)[1].lower() or "")
+    track_id = clean_db_string(uuid.uuid4().hex)
+    storage_name = clean_db_string(f"{track_id}{ext}")
     dest_path = os.path.join(FILE_UPLOAD_DIR, storage_name)
     file.save(dest_path)
 
     size = os.path.getsize(dest_path)
     base_url = get_public_base_url()
-    download_endpoint = f"{base_url}/download_file/{storage_name}?name={secure_filename(safe_name)}"
-    public_url = f"{base_url}/static/uploads/files/{storage_name}"
+    download_endpoint = clean_db_string(f"{base_url}/download_file/{storage_name}?name={secure_filename(safe_name)}")
+    public_url = clean_db_string(f"{base_url}/static/uploads/files/{storage_name}")
 
     # Extract artwork and artist if possible
     artwork_url = None
@@ -655,11 +662,14 @@ def upload_file():
             art_path = os.path.join(ARTWORK_DIR, art_name)
             with open(art_path, 'wb') as art_f:
                 art_f.write(pic_data)
-            artwork_url = f"{base_url}/static/uploads/artwork/{art_name}"
+            artwork_url = clean_db_string(f"{base_url}/static/uploads/artwork/{art_name}")
     except Exception as e:
         print(f"Error extracting artwork/artist for {storage_name}: {e}")
 
-    doc_name = request.args.get("doc") or request.form.get("doc") or "global"
+    if artist:
+        artist = clean_db_string(artist)
+
+    doc_name = clean_db_string(request.args.get("doc") or request.form.get("doc") or "global")
 
     with get_db() as conn:
         with conn.cursor() as cur:
