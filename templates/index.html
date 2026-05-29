@@ -4390,13 +4390,16 @@ body.light-mode .notepad {
             let themeColor = '#ffffff'; // Default light mode background color
             
             if (gmpEl && gmpEl.classList.contains('is-fullscreen')) {
-                // Fullscreen is strictly dark mode (single logic), so always use the dark artwork-extracted color or dark fallback
-                const track = musicState.tracks.find(t => t.id === musicState.currentId);
-                if (track && track.extractedColors) {
-                    const dark = track.extractedColors.dark;
-                    themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
+                if (body.classList.contains('dark-mode')) {
+                    const track = musicState.tracks.find(t => t.id === musicState.currentId);
+                    if (track && track.extractedColors) {
+                        const dark = track.extractedColors.dark;
+                        themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
+                    } else {
+                        themeColor = '#030305';
+                    }
                 } else {
-                    themeColor = '#030305';
+                    themeColor = '#4f5643';
                 }
             } else {
                 if (body.classList.contains('dark-mode')) {
@@ -8900,8 +8903,8 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
 
     overflow: hidden !important;
 
-    /* Layer 3: Base background gradient: Always premium dark mode (solid linear gradient to fill completely) */
-    background: linear-gradient(180deg, rgba(var(--artwork-dark-rgb, 20, 20, 25), 0.95) 0%, rgba(var(--artwork-secondary-rgb, 10, 10, 15), 0.92) 50%, #030305 100%) !important;
+    /* Layer 3: Base background gradient: Always premium dark mode */
+    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb, 20, 20, 25), 0.92) 0%, #030305 100%) !important;
     background-attachment: fixed;
     transition: none !important;
 
@@ -8936,7 +8939,7 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
     display: block !important;
     content: "";
     position: absolute;
-    inset: -20% !important;
+    inset: 0 !important;
     z-index: -3 !important;
     background-image: var(--gmp-current-artwork, linear-gradient(135deg, rgba(var(--artwork-vibrant-rgb, 40, 40, 45), 0.85), rgba(var(--artwork-secondary-rgb, 20, 20, 25), 0.85))) !important;
     background-size: cover !important;
@@ -8953,7 +8956,7 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
     display: block !important;
     content: "";
     position: absolute;
-    inset: -30% !important;
+    inset: 0 !important;
     z-index: -2 !important;
     pointer-events: none !important;
     will-change: background-image !important;
@@ -8972,7 +8975,7 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
 /* GMP Fullscreen Immersive Background Overrides on HTML & Body elements */
 html.gmp-fullscreen-active,
 body.gmp-fullscreen-active {
-    background: linear-gradient(180deg, rgba(var(--artwork-dark-rgb, 20, 20, 25), 0.95) 0%, rgba(var(--artwork-secondary-rgb, 10, 10, 15), 0.92) 50%, #030305 100%) !important;
+    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb, 20, 20, 25), 0.92) 0%, #030305 100%) !important;
     transition: background 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
