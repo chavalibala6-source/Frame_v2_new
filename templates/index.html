@@ -8880,40 +8880,40 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
 
         /* Full Screen Music Player */
    .global-music-player.is-fullscreen {
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    min-height: 100dvh !important;
-    max-height: 100dvh !important;
-    box-sizing: border-box !important;
-    z-index: 100000 !important;
+    position: fixed;
+    top: -2px !important; left: -2px !important; right: -2px !important; bottom: -2px !important;
+    height: calc(100dvh + 4px) !important;
+    min-height: calc(100dvh + 4px) !important;
+    max-height: calc(100dvh + 4px) !important;
+    box-sizing: border-box;
+    z-index: 100000;
 
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    width: calc(100% + 4px) !important;
 
     padding:
-        env(safe-area-inset-top)
+        max(40px, env(safe-area-inset-top))
         32px
-        env(safe-area-inset-bottom)
-        32px !important;
+        max(40px, env(safe-area-inset-bottom))
+        32px;
 
     overflow: hidden !important;
 
     /* Layer 3: Base background gradient: Always premium dark mode */
     background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb, 20, 20, 25), 0.92) 0%, #030305 100%) !important;
-    background-attachment: fixed !important;
+    background-attachment: fixed;
     transition: none !important;
 
-    animation: fullscreenPlayerFade 0.35s ease !important;
+    animation: fullscreenPlayerFade 0.35s ease;
     transform: none !important;
-    box-shadow: none !important;
+    box-shadow: none;
     border: none !important;
     border-radius: 0 !important;
-    isolation: isolate !important;
+    isolation: isolate;
 }
 
 /* Removed transition blur/dim overlay to prevent visual flashes and lag during track change */
@@ -8937,35 +8937,31 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
 /* Soft ambient glow cover base */
 .global-music-player.is-fullscreen::before {
     display: block !important;
-    content: "" !important;
-    position: absolute !important;
-    inset: -150px !important;
-    width: calc(100% + 300px) !important;
-    height: calc(100% + 300px) !important;
+    content: "";
+    position: absolute;
+    inset: 0 !important;
     z-index: -3 !important;
     background-image: var(--gmp-current-artwork, linear-gradient(135deg, rgba(var(--artwork-vibrant-rgb, 40, 40, 45), 0.85), rgba(var(--artwork-secondary-rgb, 20, 20, 25), 0.85))) !important;
     background-size: cover !important;
     background-position: center !important;
-    opacity: 0.35 !important;
-    filter: blur(100px) saturate(160%) !important;
+    opacity: 0.32 !important;
+    filter: blur(80px) saturate(160%) !important;
     pointer-events: none !important;
     transition: background-image 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-    transform: scale(1.15) !important;
+    transform: none !important;
 }
 
 /* Static ambient background lights (color filling only, no movement animations) */
 .global-music-player.is-fullscreen::after {
     display: block !important;
-    content: "" !important;
-    position: absolute !important;
-    inset: -150px !important;
-    width: calc(100% + 300px) !important;
-    height: calc(100% + 300px) !important;
+    content: "";
+    position: absolute;
+    inset: 0 !important;
     z-index: -2 !important;
     pointer-events: none !important;
     will-change: background-image !important;
     transition: background 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.8s ease !important;
-    transform: scale(1.15) !important;
+    transform: none !important;
     background:
         radial-gradient(circle at 15% 25%, rgba(var(--artwork-vibrant-rgb, 60, 60, 65), 0.58) 0%, rgba(var(--artwork-vibrant-rgb, 60, 60, 65), 0) 55%),
         radial-gradient(circle at 80% 75%, rgba(var(--artwork-dominant-rgb, 20, 20, 25), 0.48) 0%, rgba(var(--artwork-dominant-rgb, 20, 20, 25), 0) 60%),
@@ -8979,12 +8975,8 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
 /* GMP Fullscreen Immersive Background Overrides on HTML & Body elements */
 html.gmp-fullscreen-active,
 body.gmp-fullscreen-active {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    background: #050505 !important;
+    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb, 20, 20, 25), 0.92) 0%, #030305 100%) !important;
+    transition: background 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 /* Animation keyframes removed to keep background static */
@@ -9325,19 +9317,15 @@ body.dark-mode .global-music-player.is-fullscreen.is-playing .gmp-thumbnail {
 /* Mobile */
 @media (max-width: 768px) {
     .global-music-player.is-fullscreen {
-        inset: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        height: 100dvh !important;
-        min-height: 100dvh !important;
-        max-height: 100dvh !important;
-        box-sizing: border-box !important;
-        padding-top: env(safe-area-inset-top) !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        padding-bottom: env(safe-area-inset-bottom) !important;
-        justify-content: flex-start !important;
-        overflow: hidden !important;
+        height: 100dvh;
+        min-height: 100dvh;
+        max-height: 100dvh;
+        box-sizing: border-box;
+        padding-top: max(20px, env(safe-area-inset-top));
+        padding-left: 0;
+        padding-right: 0;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        justify-content: flex-start;
     }
 
     .global-music-player.is-fullscreen .gmp-thumbnail {
