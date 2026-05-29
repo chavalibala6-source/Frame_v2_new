@@ -3643,7 +3643,7 @@ body.light-mode .notepad {
                         <div class="gmp-thumbnail" id="gmpThumbnail">
                             <canvas id="gmpWaveCanvas" class="gmp-wave-canvas" aria-hidden="true"></canvas>
                             <i data-lucide="music"></i>
-                            <img id="gmpThumbnailImg" style="display: none;" src="" onerror="this.style.display='none'; const icon = this.parentNode.querySelector('.lucide-music, [data-lucide=\'music\']'); if (icon) icon.style.display='block';" alt="" />
+                            <img id="gmpThumbnailImg" style="display: none;" src="" onerror="this.style.display='none'; this.parentNode.classList.remove('has-artwork'); const icon = this.parentNode.querySelector('.lucide-music, [data-lucide=\'music\']'); if (icon) icon.style.display='block';" alt="" />
                         </div>
                         <div class="gmp-info">
                             <div class="gmp-title-container">
@@ -4390,18 +4390,16 @@ body.light-mode .notepad {
             let themeColor = '#ffffff'; // Default light mode background color
             
             if (gmpEl && gmpEl.classList.contains('is-fullscreen')) {
-                // When in fullscreen mode, dynamically align the status bar/browser theme-color with the backdrop colors
-                const track = musicState.tracks.find(t => t.id === musicState.currentId);
-                if (track && track.extractedColors) {
-                    if (body.classList.contains('dark-mode')) {
+                if (body.classList.contains('dark-mode')) {
+                    const track = musicState.tracks.find(t => t.id === musicState.currentId);
+                    if (track && track.extractedColors) {
                         const dark = track.extractedColors.dark;
                         themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
                     } else {
-                        const light = track.extractedColors.light;
-                        themeColor = `rgb(${light.r}, ${light.g}, ${light.b})`;
+                        themeColor = '#030305';
                     }
                 } else {
-                    themeColor = body.classList.contains('dark-mode') ? '#030305' : '#fafafc';
+                    themeColor = '#4f5643';
                 }
             } else {
                 if (body.classList.contains('dark-mode')) {
@@ -8343,12 +8341,11 @@ body.light-mode .notepad {
             background: linear-gradient(135deg, rgba(var(--artwork-dark-rgb), 0.72) 0%, rgba(10, 10, 15, 0.94) 100%);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(var(--artwork-vibrant-rgb), 0.18);
+            border: none !important;
             border-radius: 16px;
             box-shadow: 
                 0 25px 60px rgba(0, 0, 0, 0.65),
-                0 15px 40px rgba(var(--artwork-dominant-rgb), 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+                0 15px 40px rgba(var(--artwork-dominant-rgb), 0.15);
         }
 
         .gmp-side-controls {
@@ -8645,6 +8642,11 @@ body.light-mode .notepad {
             left: 0;
         }
 
+        .gmp-thumbnail.has-artwork svg:not(.gmp-wave-canvas),
+        .gmp-thumbnail.has-artwork i {
+            display: none !important;
+        }
+
         .gmp-display-meta {
             display: flex;
             align-items: center;
@@ -8697,7 +8699,7 @@ body.light-mode .notepad {
         .gmp-artist {
             font-size: 12px;
             font-weight: 600;
-            color: #3f4630;
+            color: var(--gmp-artist-color, #3f4630);
             white-space: nowrap;
             display: inline-block;
             flex-shrink: 0;
@@ -8709,7 +8711,10 @@ body.light-mode .notepad {
             color: #ffffff;
         }
 
-        body.dark-mode .gmp-artist,
+        body.dark-mode .gmp-artist {
+            color: var(--gmp-artist-color, rgba(255, 255, 255, 0.7));
+        }
+
         body.dark-mode .gmp-display-meta,
         body.dark-mode .gmp-progress-container {
             color: rgba(255, 255, 255, 0.7);
@@ -8896,10 +8901,10 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
 
     overflow: hidden !important;
 
-    /* Layer 3: Base background gradient supporting light/dark theme dynamically */
-    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-light-rgb), 0.45) 0%, #fafafc 100%) !important;
+    /* Layer 3: Base background gradient: Always premium dark mode */
+    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb, 20, 20, 25), 0.92) 0%, #030305 100%) !important;
     background-attachment: fixed;
-    transition: background 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: none !important;
 
     animation: fullscreenPlayerFade 0.35s ease;
     transform: none !important;
@@ -8924,166 +8929,64 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
 }
 
 /* =========================================
-   Base Fullscreen Ambient Layers
+   Fullscreen Dynamic Ambient Layers (Premium Dark Mode Single Logic)
    ========================================= */
 
-/* Layer 1: Blurred Album Art Background */
+/* Soft ambient glow cover base */
 .global-music-player.is-fullscreen::before {
     display: block !important;
     content: "";
     position: absolute;
-    inset: -20%;
-    z-index: -3;
-
-    background-image: var(--gmp-current-artwork, linear-gradient(135deg, rgba(var(--artwork-vibrant-rgb), 0.85), rgba(var(--artwork-secondary-rgb), 0.85))) !important;
-    background-size: cover;
-    background-position: center;
-    opacity: 0.32;
-    filter: blur(80px) saturate(160%);
-    
-    pointer-events: none;
-    transition: background-image 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
-    transform: scale(1.3);
-    transform-origin: center;
+    inset: 0 !important;
+    z-index: -3 !important;
+    background-image: var(--gmp-current-artwork, linear-gradient(135deg, rgba(var(--artwork-vibrant-rgb, 40, 40, 45), 0.85), rgba(var(--artwork-secondary-rgb, 20, 20, 25), 0.85))) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    opacity: 0.32 !important;
+    filter: blur(80px) saturate(160%) !important;
+    pointer-events: none !important;
+    transition: background-image 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    transform: none !important;
 }
 
-/* Layer 2: Adaptive Ambient Glows & Cinematic Drift */
+/* Static ambient background lights (color filling only, no movement animations) */
 .global-music-player.is-fullscreen::after {
     display: block !important;
     content: "";
     position: absolute;
-    inset: -30%;
-    z-index: -2;
-
-    pointer-events: none;
-    will-change: transform, background-image;
-    transition:
-        background 0.8s cubic-bezier(0.25, 0.8, 0.25, 1),
-        opacity 0.8s ease;
-    transform: scale(1.06);
-    transform-origin: center;
-    animation: appleCinematicDrift 28s ease-in-out infinite alternate;
-
+    inset: 0 !important;
+    z-index: -2 !important;
+    pointer-events: none !important;
+    will-change: background-image !important;
+    transition: background 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.8s ease !important;
+    transform: none !important;
     background:
-        /* Soft vibrant glow top-left */
-        radial-gradient(circle at 15% 25%, rgba(var(--artwork-vibrant-rgb), 0.42) 0%, rgba(var(--artwork-vibrant-rgb), 0) 60%),
-        /* Soft dominant glow bottom-right */
-        radial-gradient(circle at 80% 75%, rgba(var(--artwork-dominant-rgb), 0.38) 0%, rgba(var(--artwork-dominant-rgb), 0) 65%),
-        /* Soft secondary blob middle-left */
-        radial-gradient(circle at 35% 65%, rgba(var(--artwork-secondary-rgb), 0.32) 0%, rgba(var(--artwork-secondary-rgb), 0) 55%),
-        /* Soft light accent top-right */
-        radial-gradient(circle at 75% 20%, rgba(var(--artwork-light-rgb), 0.28) 0%, rgba(var(--artwork-light-rgb), 0) 45%),
-        /* Central filling dominant color */
-        radial-gradient(circle at 50% 50%, rgba(var(--artwork-dominant-rgb), 0.15) 0%, rgba(var(--artwork-dominant-rgb), 0) 50%);
+        radial-gradient(circle at 15% 25%, rgba(var(--artwork-vibrant-rgb, 60, 60, 65), 0.58) 0%, rgba(var(--artwork-vibrant-rgb, 60, 60, 65), 0) 55%),
+        radial-gradient(circle at 80% 75%, rgba(var(--artwork-dominant-rgb, 20, 20, 25), 0.48) 0%, rgba(var(--artwork-dominant-rgb, 20, 20, 25), 0) 60%),
+        radial-gradient(circle at 35% 65%, rgba(var(--artwork-secondary-rgb, 30, 30, 35), 0.45) 0%, rgba(var(--artwork-secondary-rgb, 30, 30, 35), 0) 50%),
+        radial-gradient(circle at 75% 20%, rgba(var(--artwork-light-rgb, 80, 80, 85), 0.22) 0%, rgba(var(--artwork-light-rgb), 0) 40%),
+        radial-gradient(circle at 50% 50%, rgba(var(--artwork-dominant-rgb, 20, 20, 25), 0.2) 0%, rgba(var(--artwork-dominant-rgb), 0) 50%) !important;
+    opacity: 0.82 !important;
+    mix-blend-mode: screen !important;
 }
 
-@keyframes appleCinematicDrift {
-    0% {
-        transform: scale(1.0) translate3d(0, 0, 0) rotate(0deg);
-    }
-    33% {
-        transform: scale(1.12) translate3d(-3%, -4%, 0) rotate(3deg);
-    }
-    66% {
-        transform: scale(1.05) translate3d(2%, 3%, 0) rotate(-2deg);
-    }
-    100% {
-        transform: scale(1.15) translate3d(-1%, -2%, 0) rotate(1.5deg);
-    }
-}
-
-/* =========================================
-   DARK MODE GLOWS
-   ========================================= */
-
-body.dark-mode .global-music-player.is-fullscreen {
-    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb), 0.92) 0%, #030305 100%) !important;
-}
-
-body.dark-mode .global-music-player.is-fullscreen::before {
-    opacity: 0.42;
-}
-
-body.dark-mode .global-music-player.is-fullscreen::after {
-    opacity: 0.82;
-    mix-blend-mode: screen;
-    background:
-        /* One strong top-left vibrant glow */
-        radial-gradient(circle at 15% 25%, rgba(var(--artwork-vibrant-rgb), 0.58) 0%, rgba(var(--artwork-vibrant-rgb), 0) 55%),
-        /* A warm dominant glow bottom-right */
-        radial-gradient(circle at 80% 75%, rgba(var(--artwork-dominant-rgb), 0.48) 0%, rgba(var(--artwork-dominant-rgb), 0) 60%),
-        /* A deep secondary blob middle-left */
-        radial-gradient(circle at 35% 65%, rgba(var(--artwork-secondary-rgb), 0.45) 0%, rgba(var(--artwork-secondary-rgb), 0) 50%),
-        /* A soft light accent top-right */
-        radial-gradient(circle at 75% 20%, rgba(var(--artwork-light-rgb), 0.22) 0%, rgba(var(--artwork-light-rgb), 0) 40%),
-        /* Central filling dominant color */
-        radial-gradient(circle at 50% 50%, rgba(var(--artwork-dominant-rgb), 0.2) 0%, rgba(var(--artwork-dominant-rgb), 0) 50%);
-}
-
-/* System Dark Mode (Automatic) */
-@media (prefers-color-scheme: dark) {
-    html:not(.theme-manual) .global-music-player.is-fullscreen {
-        background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb), 0.92) 0%, #030305 100%) !important;
-    }
-    html:not(.theme-manual) .global-music-player.is-fullscreen::before {
-        opacity: 0.42;
-    }
-    html:not(.theme-manual) .global-music-player.is-fullscreen::after {
-        opacity: 0.82;
-        mix-blend-mode: screen;
-        background:
-            radial-gradient(circle at 15% 25%, rgba(var(--artwork-vibrant-rgb), 0.58) 0%, rgba(var(--artwork-vibrant-rgb), 0) 55%),
-            radial-gradient(circle at 80% 75%, rgba(var(--artwork-dominant-rgb), 0.48) 0%, rgba(var(--artwork-dominant-rgb), 0) 60%),
-            radial-gradient(circle at 35% 65%, rgba(var(--artwork-secondary-rgb), 0.45) 0%, rgba(var(--artwork-secondary-rgb), 0) 50%),
-            radial-gradient(circle at 75% 20%, rgba(var(--artwork-light-rgb), 0.22) 0%, rgba(var(--artwork-light-rgb), 0) 40%),
-            radial-gradient(circle at 50% 50%, rgba(var(--artwork-dominant-rgb), 0.2) 0%, rgba(var(--artwork-dominant-rgb), 0) 50%);
-    }
-}
-
-/* =========================================
-   LIGHT MODE GLOWS
-   ========================================= */
-
-body.light-mode .global-music-player.is-fullscreen::after,
-body:not(.dark-mode) .global-music-player.is-fullscreen::after {
-    opacity: 0.92;
-    mix-blend-mode: multiply;
-    background:
-        radial-gradient(circle at 15% 25%, rgba(var(--artwork-vibrant-rgb), 0.42) 0%, rgba(var(--artwork-vibrant-rgb), 0) 60%),
-        radial-gradient(circle at 80% 75%, rgba(var(--artwork-dominant-rgb), 0.38) 0%, rgba(var(--artwork-dominant-rgb), 0) 65%),
-        radial-gradient(circle at 35% 65%, rgba(var(--artwork-secondary-rgb), 0.32) 0%, rgba(var(--artwork-secondary-rgb), 0) 55%),
-        radial-gradient(circle at 75% 20%, rgba(var(--artwork-light-rgb), 0.28) 0%, rgba(var(--artwork-light-rgb), 0) 45%),
-        radial-gradient(circle at 50% 50%, rgba(var(--artwork-dominant-rgb), 0.15) 0%, rgba(var(--artwork-dominant-rgb), 0) 50%);
-}
-
-/* GMP Fullscreen Immersive Background Overrides on HTML & Body elements to eliminate gaps in viewports and overscrolls */
+/* GMP Fullscreen Immersive Background Overrides on HTML & Body elements */
 html.gmp-fullscreen-active,
 body.gmp-fullscreen-active {
-    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-light-rgb), 0.45) 0%, #fafafc 100%) !important;
+    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb, 20, 20, 25), 0.92) 0%, #030305 100%) !important;
     transition: background 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-html.gmp-fullscreen-active.dark-mode,
-body.gmp-fullscreen-active.dark-mode {
-    background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb), 0.92) 0%, #030305 100%) !important;
-}
-
-@media (prefers-color-scheme: dark) {
-    html.gmp-fullscreen-active:not(.theme-manual) {
-        background: radial-gradient(circle at 50% 50%, rgba(var(--artwork-dark-rgb), 0.92) 0%, #030305 100%) !important;
-    }
-}
+/* Animation keyframes removed to keep background static */
 
 /* Smooth entry */
 @keyframes fullscreenPlayerFade {
     from {
         opacity: 0;
-        transform: scale(1.02);
     }
 
     to {
         opacity: 1;
-        transform: scale(1);
     }
 }
 
@@ -9099,34 +9002,34 @@ body.gmp-fullscreen-active.dark-mode {
            Light: black text/icons on white. Dark: white text/icons on black.
         ===================================================================== */
         .global-music-player.is-fullscreen {
-            /* Apple-style atmospheric defaults (Light Mode Contrast) */
-            --fs-text:          #1d1d1f;
-            --fs-title:         #1d1d1f;
-            --fs-text-sub:      rgba(29, 29, 31, 0.65);
-            --fs-text-time:     rgba(29, 29, 31, 0.48);
-            --fs-icon:          #1d1d1f;
-            --fs-icon-sub:      rgba(29, 29, 31, 0.52);
-            --fs-icon-active:   #0066cc;
-            --fs-pill-bg:       rgba(0, 0, 0, 0.06);
-            --fs-progress-bg:   rgba(0, 0, 0, 0.12);
-            --fs-progress-fill: #1d1d1f;
-            --fs-vol-bg:        rgba(0, 0, 0, 0.12);
-            --fs-vol-fill:      rgba(0, 0, 0, 0.72);
-            --fs-handle:        rgba(0, 0, 0, 0.18);
+            /* Olive contrast colors (High Contrast) */
+            --fs-text:          #ffffff;
+            --fs-title:         #ffffff;
+            --fs-text-sub:      rgba(255, 255, 255, 0.75);
+            --fs-text-time:     rgba(255, 255, 255, 0.65);
+            --fs-icon:          #ffffff;
+            --fs-icon-sub:      rgba(255, 255, 255, 0.75);
+            --fs-icon-active:   #ffffff;
+            --fs-pill-bg:       rgba(255, 255, 255, 0.15);
+            --fs-progress-bg:   rgba(255, 255, 255, 0.2);
+            --fs-progress-fill: rgba(255, 255, 255, 0.8);
+            --fs-vol-bg:        rgba(255, 255, 255, 0.2);
+            --fs-vol-fill:      rgba(255, 255, 255, 0.8);
+            --fs-handle:        rgba(255, 255, 255, 0.3);
             --fs-thumb-bg:      #ffffff;
             --fs-thumb-icon:    #86868b;
-            --fs-play-bg:       rgba(0, 102, 204, 0.08);
-            --fs-control-border: rgba(0, 0, 0, 0.06);
-            --fs-control-shadow: rgba(0, 0, 0, 0.08);
-            --fs-accent:        rgb(var(--artwork-vibrant-rgb));
-            --fs-accent-soft:   rgba(var(--artwork-vibrant-rgb), 0.16);
+            --fs-play-bg:       rgba(255, 255, 255, 0.15);
+            --fs-control-border: rgba(255, 255, 255, 0.15);
+            --fs-control-shadow: rgba(0, 0, 0, 0.2);
+            --fs-accent:        #ffffff;
+            --fs-accent-soft:   rgba(255, 255, 255, 0.15);
             --fs-text-shadow:   none;
-            --fs-progress-gradient: linear-gradient(90deg, rgb(var(--artwork-vibrant-rgb)) 0%, rgb(var(--artwork-dominant-rgb)) 50%, rgb(var(--artwork-secondary-rgb)) 100%);
-            --fs-glass-bg-light: rgba(255, 255, 255, 0.65);
-            --fs-glass-bg-dark: rgba(255, 255, 255, 0.85);
-            --fs-glass-border:  rgba(0, 0, 0, 0.06);
-            --fs-element-bg:    #ffffff;
-            --fs-element-border:#eef2f6;
+            --fs-progress-gradient: none;
+            --fs-glass-bg-light: rgba(255, 255, 255, 0.12);
+            --fs-glass-bg-dark: rgba(255, 255, 255, 0.15);
+            --fs-glass-border:  rgba(255, 255, 255, 0.15);
+            --fs-element-bg:    rgba(255, 255, 255, 0.12);
+            --fs-element-border: rgba(255, 255, 255, 0.15);
         }
 
         /* Dark mode overrides — manual class */
@@ -9134,31 +9037,31 @@ body.gmp-fullscreen-active.dark-mode {
         html.dark-mode .global-music-player.is-fullscreen {
             --fs-text:          #ffffff;
             --fs-title:         #ffffff;
-            --fs-text-sub:      rgba(255, 255, 255, 0.6);
-            --fs-text-time:     rgba(255, 255, 255, 0.45);
+            --fs-text-sub:      rgba(255, 255, 255, 0.75);
+            --fs-text-time:     rgba(255, 255, 255, 0.65);
             --fs-icon:          #ffffff;
-            --fs-icon-sub:      rgba(255, 255, 255, 0.55);
+            --fs-icon-sub:      rgba(255, 255, 255, 0.75);
             --fs-icon-active:   #ffffff;
-            --fs-pill-bg:       rgba(255, 255, 255, 0.12);
-            --fs-progress-bg:   rgba(255, 255, 255, 0.18);
-            --fs-progress-fill: #ffffff;
-            --fs-vol-bg:        rgba(255, 255, 255, 0.18);
-            --fs-vol-fill:      #ffffff;
-            --fs-handle:        rgba(255, 255, 255, 0.35);
-            --fs-thumb-bg:      #1e1e1e;
-            --fs-thumb-icon:    #aaaaaa;
-            --fs-play-bg:       rgba(255, 255, 255, 0.12);
-            --fs-control-border: rgba(255, 255, 255, 0.08);
-            --fs-control-shadow: rgba(0, 0, 0, 0.35);
-            --fs-accent:        rgb(var(--artwork-vibrant-rgb));
-            --fs-accent-soft:   rgba(var(--artwork-vibrant-rgb), 0.24);
-            --fs-text-shadow:   0 2px 8px rgba(0, 0, 0, 0.55), 0 0 18px rgba(var(--artwork-vibrant-rgb), 0.16);
-            --fs-progress-gradient: linear-gradient(90deg, rgb(var(--artwork-vibrant-rgb)) 0%, rgb(var(--artwork-dominant-rgb)) 50%, rgb(var(--artwork-secondary-rgb)) 100%);
-            --fs-glass-bg-light: rgba(255, 255, 255, 0.06);
-            --fs-glass-bg-dark: rgba(0, 0, 0, 0.45);
-            --fs-glass-border:  rgba(255, 255, 255, 0.08);
-            --fs-element-bg:    #121214;
-            --fs-element-border:#2d2d30;
+            --fs-pill-bg:       rgba(255, 255, 255, 0.15);
+            --fs-progress-bg:   rgba(255, 255, 255, 0.2);
+            --fs-progress-fill: rgba(255, 255, 255, 0.8);
+            --fs-vol-bg:        rgba(255, 255, 255, 0.2);
+            --fs-vol-fill:      rgba(255, 255, 255, 0.8);
+            --fs-handle:        rgba(255, 255, 255, 0.3);
+            --fs-thumb-bg:      #ffffff;
+            --fs-thumb-icon:    #86868b;
+            --fs-play-bg:       rgba(255, 255, 255, 0.15);
+            --fs-control-border: rgba(255, 255, 255, 0.15);
+            --fs-control-shadow: rgba(0, 0, 0, 0.2);
+            --fs-accent:        #ffffff;
+            --fs-accent-soft:   rgba(255, 255, 255, 0.15);
+            --fs-text-shadow:   none;
+            --fs-progress-gradient: none;
+            --fs-glass-bg-light: rgba(255, 255, 255, 0.12);
+            --fs-glass-bg-dark: rgba(255, 255, 255, 0.15);
+            --fs-glass-border:  rgba(255, 255, 255, 0.15);
+            --fs-element-bg:    rgba(255, 255, 255, 0.12);
+            --fs-element-border: rgba(255, 255, 255, 0.15);
         }
 
         /* System dark mode (no manual override) */
@@ -9166,31 +9069,31 @@ body.gmp-fullscreen-active.dark-mode {
             html:not(.theme-manual) .global-music-player.is-fullscreen {
                 --fs-text:          #ffffff;
                 --fs-title:         #ffffff;
-                --fs-text-sub:      rgba(255, 255, 255, 0.6);
-                --fs-text-time:     rgba(255, 255, 255, 0.45);
+                --fs-text-sub:      rgba(255, 255, 255, 0.75);
+                --fs-text-time:     rgba(255, 255, 255, 0.65);
                 --fs-icon:          #ffffff;
-                --fs-icon-sub:      rgba(255, 255, 255, 0.55);
+                --fs-icon-sub:      rgba(255, 255, 255, 0.75);
                 --fs-icon-active:   #ffffff;
-                --fs-pill-bg:       rgba(255, 255, 255, 0.12);
-                --fs-progress-bg:   rgba(255, 255, 255, 0.18);
-                --fs-progress-fill: #ffffff;
-                --fs-vol-bg:        rgba(255, 255, 255, 0.18);
-                --fs-vol-fill:      #ffffff;
-                --fs-handle:        rgba(255, 255, 255, 0.35);
-                --fs-thumb-bg:      #1e1e1e;
-                --fs-thumb-icon:    #aaaaaa;
-                --fs-play-bg:       rgba(255, 255, 255, 0.12);
-                --fs-control-border: rgba(255, 255, 255, 0.08);
-                --fs-control-shadow: rgba(0, 0, 0, 0.35);
-                --fs-accent:        rgb(var(--artwork-vibrant-rgb));
-                --fs-accent-soft:   rgba(var(--artwork-vibrant-rgb), 0.24);
-                --fs-text-shadow:   0 2px 8px rgba(0, 0, 0, 0.55), 0 0 18px rgba(var(--artwork-vibrant-rgb), 0.16);
-                --fs-progress-gradient: linear-gradient(90deg, rgb(var(--artwork-vibrant-rgb)) 0%, rgb(var(--artwork-dominant-rgb)) 50%, rgb(var(--artwork-secondary-rgb)) 100%);
-                --fs-glass-bg-light: rgba(255, 255, 255, 0.06);
-                --fs-glass-bg-dark: rgba(0, 0, 0, 0.45);
-                --fs-glass-border:  rgba(255, 255, 255, 0.08);
-                --fs-element-bg:    #121214;
-                --fs-element-border:#2d2d30;
+                --fs-pill-bg:       rgba(255, 255, 255, 0.15);
+                --fs-progress-bg:   rgba(255, 255, 255, 0.2);
+                --fs-progress-fill: rgba(255, 255, 255, 0.8);
+                --fs-vol-bg:        rgba(255, 255, 255, 0.2);
+                --fs-vol-fill:      rgba(255, 255, 255, 0.8);
+                --fs-handle:        rgba(255, 255, 255, 0.3);
+                --fs-thumb-bg:      #ffffff;
+                --fs-thumb-icon:    #86868b;
+                --fs-play-bg:       rgba(255, 255, 255, 0.15);
+                --fs-control-border: rgba(255, 255, 255, 0.15);
+                --fs-control-shadow: rgba(0, 0, 0, 0.2);
+                --fs-accent:        #ffffff;
+                --fs-accent-soft:   rgba(255, 255, 255, 0.15);
+                --fs-text-shadow:   none;
+                --fs-progress-gradient: none;
+                --fs-glass-bg-light: rgba(255, 255, 255, 0.12);
+                --fs-glass-bg-dark: rgba(255, 255, 255, 0.15);
+                --fs-glass-border:  rgba(255, 255, 255, 0.15);
+                --fs-element-bg:    rgba(255, 255, 255, 0.12);
+                --fs-element-border: rgba(255, 255, 255, 0.15);
             }
         }
 
@@ -9247,6 +9150,11 @@ body.gmp-fullscreen-active.dark-mode {
         }
 :root {
     --gmp-thumbnail-bg: #f5f5f7;
+    --artwork-dominant-rgb: 20, 20, 25;
+    --artwork-vibrant-rgb: 30, 30, 35;
+    --artwork-secondary-rgb: 25, 25, 30;
+    --artwork-dark-rgb: 15, 15, 20;
+    --artwork-light-rgb: 120, 120, 125;
 }
 
 body.dark-mode {
@@ -9255,6 +9163,13 @@ body.dark-mode {
 
 .global-music-player.is-fullscreen .gmp-thumbnail {
     background: var(--gmp-thumbnail-bg);
+}
+
+/* Smooth background transition cross-fades */
+.global-music-player.is-fullscreen.gmp-transitioning::before,
+.global-music-player.is-fullscreen.gmp-transitioning::after {
+    opacity: 0 !important;
+    transition: opacity 0.35s ease !important;
 }
 
        /* .global-music-player.is-fullscreen .gmp-thumbnail {
@@ -9320,6 +9235,7 @@ body.dark-mode {
 
 .global-music-player.is-fullscreen .gmp-thumbnail img {
     object-fit: contain;
+    transition: opacity 0.25s ease;
 }
 
 .global-music-player.is-fullscreen .gmp-thumbnail {
@@ -9745,7 +9661,7 @@ body.dark-mode .global-music-player.is-fullscreen.is-playing .gmp-thumbnail {
             white-space: nowrap;
             display: inline-block;
             margin-top: 6px;
-            color: var(--fs-text-sub);
+            color: var(--gmp-artist-color, var(--fs-text-sub));
             font-weight: 500;
             letter-spacing: -0.015em;
             text-shadow: var(--fs-text-shadow);
@@ -10039,23 +9955,30 @@ body.dark-mode #gmpFullScreenBtn svg {
             gap: 40px;
         }
 
+        /* Frosted Glass / Frozen Previous & Next Buttons */
         .global-music-player.is-fullscreen .gmp-btn {
-            background: transparent;
-            border: none;
-            box-shadow: none;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                0 4px 15px rgba(0, 0, 0, 0.15);
             color: var(--fs-icon);
-            width: 68px;
-            height: 68px;
+            width: 58px;
+            height: 58px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s ease, color 0.2s ease, opacity 0.2s ease;
-            opacity: 0.72;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+            opacity: 0.85;
         }
 
         .global-music-player.is-fullscreen .gmp-btn:hover {
             transform: scale(1.08);
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.25);
             color: var(--fs-icon-active);
             opacity: 1;
         }
@@ -10065,37 +9988,37 @@ body.dark-mode #gmpFullScreenBtn svg {
         }
 
         .global-music-player.is-fullscreen .gmp-btn svg {
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             fill: none;
             color: currentColor;
             stroke-width: 1.6;
         }
 
+        /* Frosted Glass / Frozen Play Button */
         .global-music-player.is-fullscreen .gmp-btn-main {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            width: 72px;
-            height: 72px;
+            width: 76px;
+            height: 76px;
             box-shadow:
                 inset 0 1px rgba(255, 255, 255, 0.25),
-                0 10px 30px rgba(0, 0, 0, 0.25),
-                0 0 25px rgba(var(--artwork-vibrant-rgb), 0.2);
+                0 10px 30px rgba(0, 0, 0, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+            opacity: 1 !important;
         }
 
         .global-music-player.is-fullscreen .gmp-btn-main:hover {
             transform: scale(1.08);
             box-shadow:
                 inset 0 1px rgba(255, 255, 255, 0.4),
-                0 12px 36px rgba(0, 0, 0, 0.35),
-                0 0 30px rgba(var(--artwork-vibrant-rgb), 0.3);
+                0 12px 36px rgba(0, 0, 0, 0.35);
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.35);
         }
@@ -10547,6 +10470,63 @@ body.dark-mode #gmpFullScreenBtn svg {
                 transform: translate3d(var(--scroll-distance), 0, 0);
             }
         }
+
+        /* Sleek horizontal scroll progress navigation bar */
+        .scroll-progress-nav {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 10px 24px;
+            margin-top: -8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+        
+        .scroll-progress-nav-track {
+            position: relative;
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 99px;
+            cursor: pointer;
+            transition: height 0.2s, background-color 0.2s;
+        }
+        
+        body.dark-mode .scroll-progress-nav-track {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .scroll-progress-nav-track:hover {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.12);
+        }
+        
+        body.dark-mode .scroll-progress-nav-track:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+        
+        .scroll-progress-nav-thumb {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 99px;
+            transition: background-color 0.2s, left 0.1s linear, width 0.1s linear;
+        }
+        
+        body.dark-mode .scroll-progress-nav-thumb {
+            background: rgba(255, 255, 255, 0.45);
+        }
+        
+        .scroll-progress-nav-track:hover .scroll-progress-nav-thumb {
+            background: rgba(0, 0, 0, 0.55);
+        }
+        
+        body.dark-mode .scroll-progress-nav-track:hover .scroll-progress-nav-thumb {
+            background: rgba(255, 255, 255, 0.7);
+        }
     </style>
 
     <script>
@@ -10954,7 +10934,7 @@ body.dark-mode #gmpFullScreenBtn svg {
                 window.gmpAudio.currentTime = 0;
                 window.gmpAudio.play();
             } else {
-                playNextGlobalMusic();
+                playNextGlobalMusic(false, true);
             }
         });
 
@@ -11019,9 +10999,8 @@ body.dark-mode #gmpFullScreenBtn svg {
                 savedScrollY = window.scrollY || window.pageYOffset || 0;
                 
                 // Move player to body to prevent parent transforms/animations from shifting or clipping it
-                document.body.appendChild(gmpEl);
-                
                 gmpEl.classList.add('is-fullscreen');
+                document.body.appendChild(gmpEl);
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
                 document.body.classList.add('gmp-fullscreen-active');
@@ -11101,7 +11080,7 @@ body.dark-mode #gmpFullScreenBtn svg {
             gmpTouchEndY = 0;
         });
 
-        function playNextGlobalMusic(withFlip = false) {
+        function playNextGlobalMusic(withFlip = false, isAutomatic = false) {
             if (!musicState.tracks.length) return;
             const proceed = () => {
             if (globalPlayerState.isShuffle) {
@@ -11112,10 +11091,10 @@ body.dark-mode #gmpFullScreenBtn svg {
             let idx = musicState.tracks.findIndex(t => t.id === musicState.currentId);
             if (idx === -1) idx = 0;
             else idx = (idx + 1) % musicState.tracks.length;
-            if (globalPlayerState.repeatMode === 0 && idx === 0 && musicState.currentId) {
-                // Stopped at the end
+            if (globalPlayerState.repeatMode === 0 && idx === 0 && musicState.currentId && isAutomatic) {
+                // Natural playlist playback stop: pause and reset play position of the last song
                 window.gmpAudio.pause();
-                musicState.currentId = null;
+                window.gmpAudio.currentTime = 0;
                 updateMusicButtons();
                 window.updateGlobalPlayerUI();
                 return;
@@ -11245,15 +11224,31 @@ body.dark-mode #gmpFullScreenBtn svg {
                     }
                     
                     const domHsl = rgbToHsl(avgR, avgG, avgB);
-                    const darkRgb = hslToRgb(domHsl.h, Math.max(domHsl.s, 0.45), 0.08);
-                    const lightRgb = hslToRgb(domHsl.h, Math.max(domHsl.s, 0.3), 0.94);
                     
+                    // Raw accents for UI controls (highly visible, beautiful, vibrant contrast)
+                    const rawVibrantRgb = { r: vibrant.r, g: vibrant.g, b: vibrant.b };
+                    const rawSecondaryRgb = { r: secondary.r, g: secondary.g, b: secondary.b };
+
+                    // Dark mode background overrides (extremely desaturated and dark to prevent bright background flashes and blobs)
+                    const adjustForBg = (rgb, maxSat, maxLight) => {
+                        const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+                        return hslToRgb(hsl.h, Math.min(hsl.s, maxSat), Math.min(hsl.l, maxLight));
+                    };
+
+                    const bgDominant = adjustForBg({r: avgR, g: avgG, b: avgB}, 0.12, 0.08);
+                    const bgVibrant = adjustForBg(vibrant, 0.18, 0.15);
+                    const bgSecondary = adjustForBg(secondary, 0.15, 0.10);
+                    const bgDark = adjustForBg(hslToRgb(domHsl.h, domHsl.s, 0.08), 0.08, 0.02); // 2% lightness = pure black
+                    const bgLight = adjustForBg(hslToRgb(domHsl.h, domHsl.s, 0.94), 0.08, 0.04); // extremely dark fallback
+
                     callback({
-                        dominant: { r: avgR, g: avgG, b: avgB },
-                        vibrant: { r: vibrant.r, g: vibrant.g, b: vibrant.b },
-                        secondary: { r: secondary.r, g: secondary.g, b: secondary.b },
-                        dark: darkRgb,
-                        light: lightRgb
+                        dominant: bgDominant,
+                        vibrant: bgVibrant,
+                        secondary: bgSecondary,
+                        dark: bgDark,
+                        light: bgLight,
+                        rawVibrant: rawVibrantRgb,
+                        rawSecondary: rawSecondaryRgb
                     });
                 } catch (e) {
                     console.warn("Could not extract canvas pixels:", e);
@@ -11324,6 +11319,9 @@ body.dark-mode #gmpFullScreenBtn svg {
             root.style.setProperty('--artwork-secondary-rgb', `${colors.secondary.r}, ${colors.secondary.g}, ${colors.secondary.b}`);
             root.style.setProperty('--artwork-dark-rgb', `${colors.dark.r}, ${colors.dark.g}, ${colors.dark.b}`);
             root.style.setProperty('--artwork-light-rgb', `${colors.light.r}, ${colors.light.g}, ${colors.light.b}`);
+            
+            const accent = colors.rawVibrant || colors.vibrant;
+            root.style.setProperty('--gmp-artist-color', `rgb(${accent.r}, ${accent.g}, ${accent.b})`);
             root.classList.add('has-artwork-theme');
             
             updateActiveMusicCardGlow(musicState.currentId, colors);
@@ -11338,6 +11336,7 @@ body.dark-mode #gmpFullScreenBtn svg {
             root.style.removeProperty('--artwork-secondary-rgb');
             root.style.removeProperty('--artwork-dark-rgb');
             root.style.removeProperty('--artwork-light-rgb');
+            root.style.removeProperty('--gmp-artist-color');
             root.classList.remove('has-artwork-theme');
             
             updateActiveMusicCardGlow(null, null);
@@ -11357,15 +11356,25 @@ body.dark-mode #gmpFullScreenBtn svg {
                     '--fs-vol-bg', '--fs-vol-fill', '--fs-handle',
                     '--fs-thumb-bg', '--fs-thumb-icon', '--fs-play-bg',
                     '--fs-control-border', '--fs-control-shadow',
-                    '--fs-accent', '--fs-accent-soft', '--fs-text-shadow'
+                    '--fs-accent', '--fs-accent-soft', '--fs-text-shadow',
+                    '--fs-progress-gradient', '--fs-glass-bg-light', '--fs-glass-bg-dark', '--fs-glass-border'
                 ];
                 props.forEach(p => gmpEl.style.removeProperty(p));
                 return;
             }
 
-            const accent = colors.vibrant;
+            // Use the raw uncapped vibrant color for control accents to keep them highly visible, but dark capped colors for background elements
+            const accent = colors.rawVibrant || colors.vibrant;
             const accentRgb = `${accent.r}, ${accent.g}, ${accent.b}`;
             const secondaryRgb = `${colors.secondary.r}, ${colors.secondary.g}, ${colors.secondary.b}`;
+
+            gmpEl.style.setProperty('--fs-text', '#ffffff');
+            gmpEl.style.setProperty('--fs-title', '#ffffff');
+            gmpEl.style.setProperty('--fs-text-sub', 'rgba(255, 255, 255, 0.7)');
+            gmpEl.style.setProperty('--fs-text-time', 'rgba(255, 255, 255, 0.5)');
+            gmpEl.style.setProperty('--fs-icon', '#ffffff');
+            gmpEl.style.setProperty('--fs-icon-sub', 'rgba(255, 255, 255, 0.65)');
+            gmpEl.style.setProperty('--fs-icon-active', `rgb(${accentRgb})`);
 
             gmpEl.style.setProperty('--fs-progress-fill', `rgb(${accentRgb})`);
             gmpEl.style.setProperty('--fs-vol-fill', `rgb(${accentRgb})`);
@@ -11450,19 +11459,43 @@ body.dark-mode #gmpFullScreenBtn svg {
             if (gmpThumbnail) {
                 const musicIcon = gmpThumbnail.querySelector('.lucide-music, [data-lucide="music"]');
                 if (track.artwork_url) {
-                    gmpEl.style.setProperty('--gmp-current-artwork', `url("${track.artwork_url}")`);
-                    if (thumbnailImg) {
-                        thumbnailImg.src = track.artwork_url;
-                        thumbnailImg.style.display = 'block';
-                    }
+                    // Immediately mark as having artwork to hide placeholder icon and avoid Lucide race conditions
+                    gmpThumbnail.classList.add('has-artwork');
                     if (musicIcon) {
                         musicIcon.style.display = 'none';
                     }
+
+                    // Set opacity to 0 first to fade out the previous artwork smoothly
+                    if (thumbnailImg) {
+                        thumbnailImg.style.opacity = '0';
+                    }
+                    
+                    // Preload the new artwork image in the background
+                    const img = new Image();
+                    img.src = track.artwork_url;
+                    img.onload = () => {
+                        // Only update if this is still the active track when loading finishes
+                        if (musicState.currentId === track.id) {
+                            gmpEl.style.setProperty('--gmp-current-artwork', `url("${track.artwork_url}")`);
+                            if (thumbnailImg) {
+                                thumbnailImg.src = track.artwork_url;
+                                thumbnailImg.style.display = 'block';
+                                // Trigger reflow to ensure the transition is animated
+                                void thumbnailImg.offsetWidth;
+                                thumbnailImg.style.opacity = '1';
+                            }
+                            if (musicIcon) {
+                                musicIcon.style.display = 'none';
+                            }
+                        }
+                    };
                 } else {
+                    gmpThumbnail.classList.remove('has-artwork');
                     gmpEl.style.removeProperty('--gmp-current-artwork');
                     if (thumbnailImg) {
                         thumbnailImg.src = '';
                         thumbnailImg.style.display = 'none';
+                        thumbnailImg.style.opacity = '0';
                     }
                     if (musicIcon) {
                         musicIcon.style.display = 'block';
@@ -11477,16 +11510,193 @@ body.dark-mode #gmpFullScreenBtn svg {
         };
 
         window.globalMusicPlayerBeginTrackTransition = function () {
-            if (!gmpEl || !gmpEl.classList.contains('is-fullscreen')) return;
-            gmpEl.classList.add('is-track-transitioning');
+            if (!gmpEl) return;
+            gmpEl.classList.add('gmp-transitioning');
+            if (gmpEl.classList.contains('is-fullscreen')) {
+                gmpEl.classList.add('is-track-transitioning');
+            }
         };
 
         window.globalMusicPlayerEndTrackTransition = function () {
             if (!gmpEl) return;
+            gmpEl.classList.remove('gmp-transitioning');
             window.setTimeout(() => {
                 gmpEl.classList.remove('is-track-transitioning');
             }, 120);
         };
+
+        // Global card click navigation/scrolling and music track quick play
+        document.addEventListener('click', (e) => {
+            // Ignore click inside inputs, labels, links, frames, specific delete buttons, or select actions to avoid conflicts
+            if (e.target.closest('input') || 
+                e.target.closest('label') || 
+                e.target.closest('a') ||
+                e.target.closest('iframe') ||
+                e.target.closest('.image-delete') || 
+                e.target.closest('.video-delete') ||
+                e.target.closest('.music-actions') ||
+                e.target.closest('.pdf-delete') ||
+                e.target.closest('.epub-controls') ||
+                e.target.closest('.video-controls') ||
+                e.target.closest('.epub-nav-btn') ||
+                e.target.closest('button:not(.overlay-play-btn):not(.music-play-btn)')) {
+                return;
+            }
+
+            // Find the closest card/container element
+            const card = e.target.closest('.video-container, .image-container, .pdf-embed, .epub-embed, .music-card');
+            if (!card) return;
+
+            // Find its parent horizontal scroll row
+            const row = card.closest('.video-row, .local-video-row, .image-row, .pdf-row, .epub-row, .music-row');
+            if (!row) return;
+
+            // Scroll the row horizontally to center the clicked card smoothly in the viewport
+            const rect = card.getBoundingClientRect();
+            const parentRect = row.getBoundingClientRect();
+            const scrollTarget = row.scrollLeft + (rect.left - parentRect.left) - (parentRect.width / 2) + (rect.width / 2);
+            row.scrollTo({
+                left: scrollTarget,
+                behavior: 'smooth'
+            });
+
+            // Special handling for music card clicking: plays or selects
+            if (card.classList.contains('music-card')) {
+                const id = card.dataset.id;
+                if (id) {
+                    if (musicState && musicState.selectMode) {
+                        const checkbox = card.querySelector('input[type=checkbox]');
+                        if (checkbox) {
+                            checkbox.checked = !checkbox.checked;
+                            checkbox.dispatchEvent(new Event('change'));
+                        }
+                    } else {
+                        // Play/pause the clicked track (if they didn't click the play button itself)
+                        if (!e.target.closest('.music-play-btn') && !e.target.closest('.overlay-play-btn')) {
+                            toggleMusicPlay(id);
+                        }
+                    }
+                }
+            }
+        });
+
+        // Sleek scroll progress navigation setup
+        function setupScrollProgressNav(row) {
+            if (!row || row.dataset.progressNavSetup === 'true') return;
+            row.dataset.progressNavSetup = 'true';
+
+            // Create progress bar track container
+            const track = document.createElement('div');
+            track.className = 'scroll-progress-nav';
+            track.innerHTML = `
+                <div class="scroll-progress-nav-track">
+                    <div class="scroll-progress-nav-thumb"></div>
+                </div>
+            `;
+            
+            // Insert it directly after the row
+            row.parentNode.insertBefore(track, row.nextSibling);
+
+            const thumb = track.querySelector('.scroll-progress-nav-thumb');
+            const trackInner = track.querySelector('.scroll-progress-nav-track');
+
+            function updateThumb() {
+                const scrollWidth = row.scrollWidth;
+                const clientWidth = row.clientWidth;
+                const scrollLeft = row.scrollLeft;
+
+                const maxScroll = scrollWidth - clientWidth;
+                if (maxScroll <= 0) {
+                    track.style.display = 'none';
+                    return;
+                }
+                track.style.display = 'flex';
+
+                // Size of the thumb is proportional to the visible content
+                const thumbWidthPct = Math.max(10, (clientWidth / scrollWidth) * 100);
+                thumb.style.width = thumbWidthPct + '%';
+
+                // Position of the thumb
+                const scrollPct = scrollLeft / maxScroll;
+                const leftPct = scrollPct * (100 - thumbWidthPct);
+                thumb.style.left = leftPct + '%';
+            }
+
+            // Listen to scroll and window resize events
+            row.addEventListener('scroll', updateThumb, { passive: true });
+            window.addEventListener('resize', updateThumb, { passive: true });
+
+            // Hook up click and drag to navigate!
+            let isDragging = false;
+
+            function navigateToX(clientX) {
+                const rect = trackInner.getBoundingClientRect();
+                const clickX = clientX - rect.left;
+                const width = rect.width;
+
+                const thumbWidth = thumb.offsetWidth;
+                const maxScroll = row.scrollWidth - row.clientWidth;
+
+                // Center the thumb around the click position
+                let pct = (clickX - thumbWidth / 2) / (width - thumbWidth);
+                pct = Math.max(0, Math.min(1, pct));
+
+                row.scrollLeft = pct * maxScroll;
+            }
+
+            trackInner.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                navigateToX(e.clientX);
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                navigateToX(e.clientX);
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            // Touch support
+            trackInner.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                navigateToX(e.touches[0].clientX);
+                e.preventDefault();
+            }, { passive: false });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                navigateToX(e.touches[0].clientX);
+            }, { passive: false });
+
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+
+            // Initial call
+            setTimeout(updateThumb, 100);
+            
+            // Mutation observer to dynamically update when children change size or list grows
+            const observer = new MutationObserver(updateThumb);
+            observer.observe(row, { childList: true, subtree: true });
+            row._progressObserver = observer;
+        }
+
+        function initAllScrollProgressNavs() {
+            const rows = document.querySelectorAll('.video-row, .local-video-row, .image-row, .pdf-row, .epub-row, .music-row');
+            rows.forEach(row => setupScrollProgressNav(row));
+        }
+
+        // Auto-initialize new horizontal scroll rows as they are created in the DOM
+        const bodyObserver = new MutationObserver(() => {
+            initAllScrollProgressNavs();
+        });
+        bodyObserver.observe(document.body, { childList: true, subtree: true });
+
+        // Run initial scan
+        initAllScrollProgressNavs();
 
         initMediaSessionControls();
         bindProgressBarScrubbing();
