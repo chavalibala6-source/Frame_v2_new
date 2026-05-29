@@ -11268,7 +11268,7 @@ body.dark-mode #gmpFullScreenBtn svg {
                     const bgVibrant = adjustForBg(vibrant, 0.18, 0.15);
                     const bgSecondary = adjustForBg(secondary, 0.15, 0.10);
                     const bgDark = adjustForBg(hslToRgb(domHsl.h, domHsl.s, 0.08), 0.08, 0.02); // 2% lightness = pure black
-                    const bgLight = adjustForBg(hslToRgb(domHsl.h, domHsl.s, 0.94), 0.08, 0.04); // extremely dark fallback
+                    const bgLight = adjustForBg(hslToRgb(domHsl.h, domHsl.s, 0.95), 0.20, 0.95); // soft light pastel color for light mode backgrounds
 
                     callback({
                         dominant: bgDominant,
