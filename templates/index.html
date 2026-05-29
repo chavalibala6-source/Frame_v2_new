@@ -10431,7 +10431,6 @@ body.dark-mode #gmpFullScreenBtn svg {
 
         /* Make all text and icons fully opaque (100% solid color, no transparency) */
         .global-music-player.is-fullscreen .gmp-title,
-        .global-music-player.is-fullscreen .gmp-artist,
         .global-music-player.is-fullscreen #gmpCurrentTime,
         .global-music-player.is-fullscreen #gmpTotalTime,
         .global-music-player.is-fullscreen .gmp-btn svg,
@@ -10440,6 +10439,11 @@ body.dark-mode #gmpFullScreenBtn svg {
         .global-music-player.is-fullscreen .gmp-drag-handle::after {
             opacity: 1 !important;
             color: #ffffff !important;
+        }
+
+        .global-music-player.is-fullscreen .gmp-artist {
+            opacity: 1 !important;
+            color: var(--gmp-artist-color, #ffffff) !important;
         }
 
         /* Adjust progress bar and volume slider track opacities to be highly readable without transparency */
