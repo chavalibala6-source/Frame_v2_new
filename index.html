@@ -4390,13 +4390,18 @@ body.light-mode .notepad {
             let themeColor = '#ffffff'; // Default light mode background color
             
             if (gmpEl && gmpEl.classList.contains('is-fullscreen')) {
-                // Fullscreen is strictly dark mode, so always use the dark extracted color or dark fallback
+                // When in fullscreen mode, dynamically align the status bar/browser theme-color with the backdrop colors
                 const track = musicState.tracks.find(t => t.id === musicState.currentId);
                 if (track && track.extractedColors) {
-                    const dark = track.extractedColors.dark;
-                    themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
+                    if (body.classList.contains('dark-mode')) {
+                        const dark = track.extractedColors.dark;
+                        themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
+                    } else {
+                        const light = track.extractedColors.light;
+                        themeColor = `rgb(${light.r}, ${light.g}, ${light.b})`;
+                    }
                 } else {
-                    themeColor = '#030305';
+                    themeColor = body.classList.contains('dark-mode') ? '#030305' : '#fafafc';
                 }
             } else {
                 if (body.classList.contains('dark-mode')) {
@@ -8939,7 +8944,7 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
     display: block !important;
     content: "";
     position: absolute;
-    inset: -20% !important;
+    inset: 0 !important;
     z-index: -3 !important;
     background-image: var(--gmp-current-artwork, linear-gradient(135deg, rgba(var(--artwork-vibrant-rgb, 40, 40, 45), 0.85), rgba(var(--artwork-secondary-rgb, 20, 20, 25), 0.85))) !important;
     background-size: cover !important;
@@ -8956,7 +8961,7 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
     display: block !important;
     content: "";
     position: absolute;
-    inset: -30% !important;
+    inset: 0 !important;
     z-index: -2 !important;
     pointer-events: none !important;
     will-change: background-image !important;
@@ -10445,8 +10450,14 @@ body.dark-mode #gmpFullScreenBtn svg {
         .global-music-player.is-fullscreen .gmp-progress-bar {
             background: rgba(255, 255, 255, 0.24) !important;
         }
+        .global-music-player.is-fullscreen .gmp-progress-fill {
+            background: #ffffff !important;
+        }
         .global-music-player.is-fullscreen .gmp-vol-slider {
             background: rgba(255, 255, 255, 0.24) !important;
+        }
+        .global-music-player.is-fullscreen .gmp-vol-fill {
+            background: #ffffff !important;
         }
 
         @keyframes css-marquee {
@@ -10984,6 +10995,31 @@ body.dark-mode #gmpFullScreenBtn svg {
 
         let savedScrollX = 0;
         let savedScrollY = 0;
+
+        function updateThemeColorMeta() {
+            const isDarkMode = document.body.classList.contains('dark-mode') || 
+                             (window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('theme-manual'));
+            const isFullscreen = gmpEl.classList.contains('is-fullscreen');
+            
+            const rootStyle = getComputedStyle(document.documentElement);
+            const artworkDarkRgb = rootStyle.getPropertyValue('--artwork-dark-rgb').trim();
+            const artworkLightRgb = rootStyle.getPropertyValue('--artwork-light-rgb').trim();
+            
+            let color = '#ffffff';
+            if (isFullscreen) {
+                color = isDarkMode ? `rgb(${artworkDarkRgb || '3, 3, 5'})` : `rgb(${artworkLightRgb || '250, 250, 252'})`;
+            } else {
+                color = isDarkMode ? '#121214' : '#ffffff';
+            }
+            
+            let meta = document.querySelector('meta[name="theme-color"]');
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.name = 'theme-color';
+                document.head.appendChild(meta);
+            }
+            meta.content = color;
+        }
 
         gmpFullScreenBtn?.addEventListener('click', () => {
             if (!gmpEl.classList.contains('is-fullscreen')) {

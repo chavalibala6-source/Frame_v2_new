@@ -4390,13 +4390,16 @@ body.light-mode .notepad {
             let themeColor = '#ffffff'; // Default light mode background color
             
             if (gmpEl && gmpEl.classList.contains('is-fullscreen')) {
-                // Fullscreen is strictly dark mode, so always use the dark extracted color or dark fallback
-                const track = musicState.tracks.find(t => t.id === musicState.currentId);
-                if (track && track.extractedColors) {
-                    const dark = track.extractedColors.dark;
-                    themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
+                if (body.classList.contains('dark-mode')) {
+                    const track = musicState.tracks.find(t => t.id === musicState.currentId);
+                    if (track && track.extractedColors) {
+                        const dark = track.extractedColors.dark;
+                        themeColor = `rgb(${dark.r}, ${dark.g}, ${dark.b})`;
+                    } else {
+                        themeColor = '#030305';
+                    }
                 } else {
-                    themeColor = '#030305';
+                    themeColor = '#4f5643';
                 }
             } else {
                 if (body.classList.contains('dark-mode')) {
@@ -8936,7 +8939,7 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
     display: block !important;
     content: "";
     position: absolute;
-    inset: -20% !important;
+    inset: 0 !important;
     z-index: -3 !important;
     background-image: var(--gmp-current-artwork, linear-gradient(135deg, rgba(var(--artwork-vibrant-rgb, 40, 40, 45), 0.85), rgba(var(--artwork-secondary-rgb, 20, 20, 25), 0.85))) !important;
     background-size: cover !important;
@@ -8953,7 +8956,7 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
     display: block !important;
     content: "";
     position: absolute;
-    inset: -30% !important;
+    inset: 0 !important;
     z-index: -2 !important;
     pointer-events: none !important;
     will-change: background-image !important;
@@ -10449,8 +10452,14 @@ body.dark-mode #gmpFullScreenBtn svg {
         .global-music-player.is-fullscreen .gmp-progress-bar {
             background: rgba(255, 255, 255, 0.24) !important;
         }
+        .global-music-player.is-fullscreen .gmp-progress-fill {
+            background: #ffffff !important;
+        }
         .global-music-player.is-fullscreen .gmp-vol-slider {
             background: rgba(255, 255, 255, 0.24) !important;
+        }
+        .global-music-player.is-fullscreen .gmp-vol-fill {
+            background: #ffffff !important;
         }
 
         @keyframes css-marquee {
