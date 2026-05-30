@@ -8963,6 +8963,13 @@ body.dark-mode .gmp-progress-bar:hover .gmp-progress-thumb {
    Fullscreen Dynamic Ambient Layers (Premium Dark Mode Single Logic)
    ========================================= */
 
+/* Hide colorful ambient layers in fullscreen mode if the song has no artwork */
+html:not(.has-artwork-theme) .global-music-player.is-fullscreen::before,
+html:not(.has-artwork-theme) .global-music-player.is-fullscreen::after {
+    display: none !important;
+    opacity: 0 !important;
+}
+
 /* Soft ambient glow cover base */
 .global-music-player.is-fullscreen::before {
     display: block !important;
