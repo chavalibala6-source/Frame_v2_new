@@ -7151,7 +7151,7 @@ body.light-mode .notepad {
                 timeLabel: null,
                 checkbox: null,
                 downloadStatusEl: null,
-                artwork_url: (payload.artwork_url && payload.artwork_url !== "None" && payload.artwork_url !== "null") ? payload.artwork_url : null
+                artwork_url: (payload.artwork_url && payload.artwork_url !== "None" && payload.artwork_url !== "null" && payload.artwork_url.trim() !== "") ? payload.artwork_url : "/static/uploads/2b669783575246b7a441f4d3cd17a2ac.png"
             };
         }
 
